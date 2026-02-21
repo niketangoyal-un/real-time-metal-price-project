@@ -1,12 +1,11 @@
 let container=document.getElementById("container")
-
-const fetchData=async()=>{
-    let url="http://localhost:3000/api/v1/getprices"
+  import { io } from "https://cdn.socket.io/4.8.3/socket.io.esm.min.js";
+const socket = io('http://localhost:3000');
+const fetchData=(data)=>{
     let y = ''
-    let response=await fetch(url)
-    let data=await response.json();
-    const metals=data?.data?.metals
-    // console.log(data?.data?.metals)
+   
+    
+    const metals=data?.metals
     for(let metal in metals){
         y+=` <div class="metal">
             <h2>${metal}</h2>
@@ -17,5 +16,24 @@ const fetchData=async()=>{
     }
     container.innerHTML=y;
 }
-setInterval(fetchData, 5000);
-fetchData();
+
+
+socket.on("connect", () => {
+  console.log("Connected:", socket.id);
+});
+
+socket.on("disconnect", (reason) => {
+  console.log("Disconnected:", reason);
+});
+socket.on('price_update',(data)=>{
+    console.log("hlo")
+    fetchData(JSON.parse(data) )
+})
+window.onload=async function(){
+    let url="http://localhost:3000/api/v1/getprices"
+ const response=await fetch(url)
+ const data=await response.json();
+ console.log(data.data)
+ fetchData(data.data)
+
+}
